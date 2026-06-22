@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +73,8 @@ public class GridController {
     }
 
     private List<String> parseCsv(String value) {
-        if (value == null || value.isBlank()) {
-            return List.of();
+        if (value == null || value.trim().isEmpty()) {
+            return Collections.emptyList();
         }
         return Arrays.stream(value.split(","))
                 .map(String::trim)

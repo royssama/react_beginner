@@ -14,14 +14,48 @@ react_beginner/
 
 ## 실행 방법
 
+> **주의:** `package.json`은 `frontend` 폴더에 있습니다.  
+> 프로젝트 루트에서도 `npm install` / `npm run dev` 를 사용할 수 있습니다.
+
 ### 1. 백엔드 (포트 8080)
+
+> **Maven 설치 불필요** — `mvnw.cmd` (Maven Wrapper) 사용  
+> **Java JDK 8** 필요 — JRE만 있으면 컴파일 오류가 납니다.
+
+#### JDK 확인
+
+```bash
+javac -version
+```
+
+`javac` 명령이 없으면 **JDK**를 설치해야 합니다.  
+추천: [Amazon Corretto 8 JDK](https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html) (Windows x64 `.msi`)
+
+설치 후 **새 명령 프롬프트**를 열고 다시 확인하세요.
+
+#### 백엔드 실행
 
 ```bash
 cd backend
-mvn spring-boot:run
+mvnw.cmd spring-boot:run
 ```
 
+또는 `run-backend.bat` 더블클릭
+
+- `mvn` 대신 **`mvnw.cmd`** 를 사용하세요 (Maven 별도 설치 불필요)
+- **처음 실행 시** Maven 자동 다운로드로 1~3분 걸릴 수 있습니다
+
 ### 2. 프론트엔드 (포트 5173)
+
+**방법 A — 프로젝트 루트에서 실행**
+
+```bash
+cd C:\projects\react_beginner
+npm install
+npm run dev
+```
+
+**방법 B — frontend 폴더에서 실행**
 
 ```bash
 cd frontend
