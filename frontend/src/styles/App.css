@@ -1,0 +1,282 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+  background: #f4f6f9;
+  color: #1f2937;
+}
+
+.app-layout {
+  min-height: 100vh;
+}
+
+.app-nav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #1e3a5f;
+}
+
+.app-nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.app-nav a.active,
+.app-nav a:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+.app-main {
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.page-title {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+}
+
+.panel-title {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  color: #374151;
+}
+
+.search-panel,
+.grid-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-item-wide {
+  grid-column: span 2;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.filter-input,
+.filter-select {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.filter-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.filter-multiselect {
+  min-height: 80px;
+}
+
+.checkbox-fallback {
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inline-check,
+.radio-label,
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  margin-right: 12px;
+}
+
+.radio-group,
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #d1d5db;
+}
+
+.loading-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.grid-placeholder {
+  color: #6b7280;
+  padding: 24px;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.grid-container {
+  width: 100%;
+}
+
+.grid-count {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Study Page */
+.study-page h1 {
+  margin-bottom: 8px;
+}
+
+.study-intro {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.study-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.study-section h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #1e40af;
+}
+
+.study-desc {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin: 0 0 12px;
+}
+
+.study-demo {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.study-code {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.study-result {
+  margin-top: 8px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.study-input {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.study-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.study-tab {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.study-tab.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .filter-item-wide {
+    grid-column: span 1;
+  }
+
+  .filter-multiselect {
+    display: none;
+  }
+
+  .checkbox-fallback {
+    display: flex;
+  }
+}
