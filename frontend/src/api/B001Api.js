@@ -1,4 +1,5 @@
 import axiosUtil from "../utils/axiosUtil";
+import { mapGridSearchRows } from "../utils/gridRowUtil";
 
 export const fetchGridDepartments = async (params) => {
   let searchData = params;
@@ -27,8 +28,20 @@ export const fetchGridTypes = async () => {
   return response;
 };
 
+/**
+ * 그리드 목록 조회 (api/grid/search)
+ * 응답 data 각 행 필드:
+ *   company(회사), industry(업종), partner(협력업체), manager(담당자), location(위치)
+ *   aa2022, aa2023, aa2024, bb2022, bb2023, bb2024
+ */
 export const fetchGridData = async (params) => {
   let searchData = params;
   const response = await axiosUtil.get("api/grid/search", searchData, {});
-  return response;
+  const rows = mapGridSearchRows(response?.data ?? []);
+
+  return {
+    ...response,
+    data: rows,
+    totalCount: rows.length,
+  };
 };

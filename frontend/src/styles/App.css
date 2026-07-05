@@ -178,6 +178,11 @@ body {
   width: 100%;
 }
 
+.grid-container-scroll {
+  height: 520px;
+  overflow-x: auto;
+}
+
 .grid-count {
   margin: 12px 0 0;
   font-size: 0.85rem;

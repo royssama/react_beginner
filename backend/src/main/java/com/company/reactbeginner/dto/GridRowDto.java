@@ -4,28 +4,38 @@ public class GridRowDto {
 
     private String id;
     private String week;
-    private String departmentName;
-    private String sectionName;
-    private String categoryName;
-    private String statusName;
-    private String typeName;
-    private String title;
-    private int amount;
+    private String company;
+    private String industry;
+    private String partner;
+    private String manager;
+    private String location;
+    private int aa_2022;
+    private int aa_2023;
+    private int aa_2024;
+    private int bb_2022;
+    private int bb_2023;
+    private int bb_2024;
 
     public GridRowDto() {
     }
 
-    public GridRowDto(String id, String week, String departmentName, String sectionName,
-                      String categoryName, String statusName, String typeName, String title, int amount) {
+    public GridRowDto(String id, String week, String company, String industry, String partner,
+                      String manager, String location,
+                      int aa_2022, int aa_2023, int aa_2024,
+                      int bb_2022, int bb_2023, int bb_2024) {
         this.id = id;
         this.week = week;
-        this.departmentName = departmentName;
-        this.sectionName = sectionName;
-        this.categoryName = categoryName;
-        this.statusName = statusName;
-        this.typeName = typeName;
-        this.title = title;
-        this.amount = amount;
+        this.company = company;
+        this.industry = industry;
+        this.partner = partner;
+        this.manager = manager;
+        this.location = location;
+        this.aa_2022 = aa_2022;
+        this.aa_2023 = aa_2023;
+        this.aa_2024 = aa_2024;
+        this.bb_2022 = bb_2022;
+        this.bb_2023 = bb_2023;
+        this.bb_2024 = bb_2024;
     }
 
     public String getId() {
@@ -44,59 +54,91 @@ public class GridRowDto {
         this.week = week;
     }
 
-    public String getDepartmentName() {
-        return departmentName;
+    public String getCompany() {
+        return company;
     }
 
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+    public void setCompany(String company) {
+        this.company = company;
     }
 
-    public String getSectionName() {
-        return sectionName;
+    public String getIndustry() {
+        return industry;
     }
 
-    public void setSectionName(String sectionName) {
-        this.sectionName = sectionName;
+    public void setIndustry(String industry) {
+        this.industry = industry;
     }
 
-    public String getCategoryName() {
-        return categoryName;
+    public String getPartner() {
+        return partner;
     }
 
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setPartner(String partner) {
+        this.partner = partner;
     }
 
-    public String getStatusName() {
-        return statusName;
+    public String getManager() {
+        return manager;
     }
 
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
+    public void setManager(String manager) {
+        this.manager = manager;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public String getLocation() {
+        return location;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
-    public String getTitle() {
-        return title;
+    public int getAa_2022() {
+        return aa_2022;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setAa_2022(int aa_2022) {
+        this.aa_2022 = aa_2022;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getAa_2023() {
+        return aa_2023;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setAa_2023(int aa_2023) {
+        this.aa_2023 = aa_2023;
+    }
+
+    public int getAa_2024() {
+        return aa_2024;
+    }
+
+    public void setAa_2024(int aa_2024) {
+        this.aa_2024 = aa_2024;
+    }
+
+    public int getBb_2022() {
+        return bb_2022;
+    }
+
+    public void setBb_2022(int bb_2022) {
+        this.bb_2022 = bb_2022;
+    }
+
+    public int getBb_2023() {
+        return bb_2023;
+    }
+
+    public void setBb_2023(int bb_2023) {
+        this.bb_2023 = bb_2023;
+    }
+
+    public int getBb_2024() {
+        return bb_2024;
+    }
+
+    public void setBb_2024(int bb_2024) {
+        this.bb_2024 = bb_2024;
     }
 }

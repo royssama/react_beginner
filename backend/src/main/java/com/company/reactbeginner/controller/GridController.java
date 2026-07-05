@@ -38,16 +38,19 @@ public class GridController {
 
     @GetMapping("/options/categories")
     public Map<String, Object> getCategories() {
+
         return success(gridMockService.getCategories());
     }
 
     @GetMapping("/options/statuses")
     public Map<String, Object> getStatuses() {
+
         return success(gridMockService.getStatuses());
     }
 
     @GetMapping("/options/types")
     public Map<String, Object> getTypes() {
+
         return success(gridMockService.getTypes());
     }
 
