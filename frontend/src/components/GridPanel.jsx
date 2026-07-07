@@ -78,6 +78,15 @@ height: 100%;
   .ag-cell.cell-arrow-top {
     align-items: flex-start !important;
   }
+
+  /* 행 hover 시 펼침 테이블 배경색 변경 (ag-row-hover는 AG Grid가 마우스 오버 시 부여) */
+  .ag-row:hover .table-cell-renderer th,
+  .ag-row:hover .table-cell-renderer td,
+  .ag-row.ag-row-hover .table-cell-renderer th,
+  .ag-row.ag-row-hover .table-cell-renderer td {
+    background-color: #e8f4fc !important;
+    transition: background-color 0.15s ease;
+  }
 `;
 
 
