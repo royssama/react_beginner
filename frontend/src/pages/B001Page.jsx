@@ -24,15 +24,6 @@ const B001Page = () => {
 
   const { rowData, loading: gridLoading, searched, search, clearGrid } = useGrid();
 
-
-console.log(rowData);
-
-
-
-
-
-
-
   const handleSearch = async () => {
     await search(getSearchParams());
   };
