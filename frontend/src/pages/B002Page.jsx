@@ -1,8 +1,11 @@
+import { useEffect, useRef } from "react";
 import SearchPanel from "../components/SearchPanel";
 import GridPanelB002 from "../components/GridPanelB002";
-import { useSearch } from "../hooks/useSearch";
+import { useSearchB002 } from "../hooks/useSearchB002";
 import { useGridB002 } from "../hooks/useGridB002";
+import { B002_GRID_OPTIONS } from "../config/b002GridOptions";
 
+/** B002 화면 — 조회 패널 + 그리드 패널 조합 */
 const B002Page = () => {
   const {
     filters,
@@ -20,7 +23,7 @@ const B002Page = () => {
     handleTypeChange,
     resetFilters,
     getSearchParams,
-  } = useSearch();
+  } = useSearchB002();
 
   const {
     rowData,
@@ -28,22 +31,35 @@ const B002Page = () => {
     searched,
     isEditing,
     saving,
+    syncing,
     search,
     clearGrid,
     startEdit,
     cancelEdit,
     updateDetail,
+    syncRowDetails,
     save,
   } = useGridB002();
 
+  /** 조회 버튼 — 검색 조건으로 그리드 데이터 조회 */
   const handleSearch = async () => {
     await search(getSearchParams());
   };
 
+  /** 초기화 버튼 — 검색 조건·그리드 데이터 초기화 */
   const handleReset = async () => {
     await resetFilters();
     clearGrid();
   };
+
+  const initialSearchDone = useRef(false);
+
+  /** 최초 진입 시 부서 로드 완료 후 자동 조회 (1회) */
+  useEffect(() => {
+    if (loading || !filters.departmentCode || initialSearchDone.current) return;
+    initialSearchDone.current = true;
+    search(getSearchParams());
+  }, [loading, filters.departmentCode, search, getSearchParams]);
 
   return (
     <div className="page b002-page">
@@ -64,7 +80,7 @@ const B002Page = () => {
         onTypeChange={handleTypeChange}
         onSearch={handleSearch}
         onReset={handleReset}
-        gridLoading={gridLoading || saving}
+        gridLoading={gridLoading || saving || syncing}
       />
       <GridPanelB002
         rowData={rowData}
@@ -72,10 +88,13 @@ const B002Page = () => {
         searched={searched}
         isEditing={isEditing}
         saving={saving}
+        syncing={syncing}
+        preserveViewOnDetailSync={B002_GRID_OPTIONS.preserveViewOnDetailSync}
         onStartEdit={startEdit}
         onSave={save}
         onCancelEdit={cancelEdit}
         onDetailChange={updateDetail}
+        onSyncRowDetails={syncRowDetails}
       />
     </div>
   );

@@ -4,8 +4,9 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import styled from "styled-components";
 import arrowImg from "./arrow.png";
-import { getDetailAuthOptions } from "../data/mockAuthData";
+import DetailSelectModal from "./DetailSelectModal";
 
+/** 점수 필드 추출 (cellStyle 조건용) */
 const getScore = (data) => data?.score ?? data?.aa2024 ?? 0;
 
 const GridWrapper = styled.div`
@@ -85,9 +86,11 @@ const ROW_HEIGHT_COLLAPSED = 42;
 const ROW_HEIGHT_EXPANDED_FALLBACK = 80;
 const ROW_HEIGHT_PADDING = 12;
 
+/** 행 펼침/접기 화살표 셀 렌더러 */
 const ArrowCellRenderer = ({ data, isExpanded, onToggle }) => {
   const rowId = data?.id;
 
+  /** 화살표 클릭 시 해당 row 펼침 토글 */
   const handleClick = (e) => {
     e.stopPropagation();
     onToggle?.(rowId);
@@ -125,7 +128,9 @@ const ArrowCellRenderer = ({ data, isExpanded, onToggle }) => {
   );
 };
 
+/** 헤더 전체 펼침/접기 화살표 */
 const ArrowHeaderComponent = ({ isAllExpanded, onToggleAll }) => {
+  /** 헤더 화살표 클릭 시 전체 row 펼침/접기 */
   const handleClick = (e) => {
     e.stopPropagation();
     onToggleAll?.();
@@ -164,14 +169,14 @@ const ArrowHeaderComponent = ({ isAllExpanded, onToggleAll }) => {
   );
 };
 
-/** B002 — 펼침 테이블 수정용 (세부권한=셀렉트, 사용여부=체크박스) */
+/** B002 — 펼침 테이블 (DETAIL_ID/NM 클릭 시 모달) */
 const EditableTableCellRenderer = ({
   data,
   isExpanded,
   isEditing,
-  detailAuthOptions,
   onHeightChange,
   onDetailChange,
+  onOpenDetailModal,
 }) => {
   const containerRef = useRef(null);
   const details = data?.details ?? [];
@@ -179,6 +184,7 @@ const EditableTableCellRenderer = ({
   useEffect(() => {
     if (!isExpanded || !data?.id) return;
 
+    /** 펼침 테이블 높이 측정 후 AG Grid row 높이 갱신 */
     const measure = () => {
       const el = containerRef.current;
       if (!el) return;
@@ -191,63 +197,93 @@ const EditableTableCellRenderer = ({
     return () => observer.disconnect();
   }, [isExpanded, data, details, isEditing, onHeightChange]);
 
+  /** AG Grid 이벤트 전파 차단 (셀 클릭/편집 충돌 방지) */
   const stopGridEvent = (e) => {
     e.stopPropagation();
   };
 
+  /** DETAIL_ID/NM 클릭 시 세부권한 선택 모달 오픈 */
+  const handleDetailCellClick = (e) => {
+    stopGridEvent(e);
+    onOpenDetailModal?.(data);
+  };
+
   return (
     <div ref={containerRef} style={{ padding: "4px 0" }} onMouseDown={stopGridEvent}>
-      <div>{data?.authName}</div>
+      <div
+        role="button"
+        tabIndex={0}
+        className={isExpanded ? "detail-cell-link-wrap" : undefined}
+        onMouseDown={isExpanded ? stopGridEvent : undefined}
+        onClick={isExpanded ? handleDetailCellClick : undefined}
+        onKeyDown={
+          isExpanded
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") handleDetailCellClick(e);
+              }
+            : undefined
+        }
+      >
+        {data?.authName}
+      </div>
       {isExpanded && (
         <table
           className="table-cell-renderer"
-          style={{ width: "600px", borderCollapse: "collapse", marginTop: 6 ,    background: "#eee"}}
+          style={{ width: "720px", borderCollapse: "collapse", marginTop: 6, background: "#eee" }}
           onClick={stopGridEvent}
           onMouseDown={stopGridEvent}
         >
           <thead>
             <tr>
-              <th style={{ width: "72%" }}>세부권한정보</th>
-              <th style={{ width: "28%" }}>사용여부</th>
+              <th style={{ width: "18%" }}>DETAIL_ID</th>
+              <th style={{ width: "28%" }}>DETAIL_NM</th>
+              <th style={{ width: "34%" }}>DETAIL_AUTH</th>
+              <th style={{ width: "20%" }}>DETAIL_USE_YN</th>
             </tr>
           </thead>
           <tbody>
             {details.map((item, index) => (
               <tr key={item.detailId ?? `${data.id}-${index}`}>
                 <td>
-                  <select
-                    className="detail-select"
-                    value={item.detailAuth}
-                    disabled={!isEditing}
+                  <button
+                    type="button"
+                    className="detail-cell-link"
                     onMouseDown={stopGridEvent}
-                    onClick={stopGridEvent}
-                    onChange={(e) =>
-                      onDetailChange?.(data.id, index, "detailAuth", e.target.value)
-                    }
+                    onClick={handleDetailCellClick}
                   >
-                    {detailAuthOptions.map((opt) => (
-                      <option key={opt.code} value={opt.code}>
-                        {opt.name}
-                      </option>
-                    ))}
-                  </select>
+                    {item.detailId ?? ""}
+                  </button>
                 </td>
-                <td style={{ textAlign: "center" }}>
-                  <input
-                    type="checkbox"
-                    checked={item.detailUseYn === "Y"}
-                    disabled={!isEditing}
+                <td>
+                  <button
+                    type="button"
+                    className="detail-cell-link"
                     onMouseDown={stopGridEvent}
-                    onClick={stopGridEvent}
-                    onChange={(e) =>
-                      onDetailChange?.(
-                        data.id,
-                        index,
-                        "detailUseYn",
-                        e.target.checked ? "Y" : "N"
-                      )
-                    }
-                  />
+                    onClick={handleDetailCellClick}
+                  >
+                    {item.detailNm ?? ""}
+                  </button>
+                </td>
+                <td>{item.detailAuth ?? ""}</td>
+                <td style={{ textAlign: "center" }}>
+                  {isEditing ? (
+                    <input
+                      type="checkbox"
+                      checked={item.detailUseYn === "Y"}
+                      onMouseDown={stopGridEvent}
+                      onClick={stopGridEvent}
+                      onChange={(e) =>
+                        onDetailChange?.(
+                          data.id,
+                          index,
+                          "detailUseYn",
+                          e.target.checked ? "Y" : "N"
+                        )
+                      }
+                    />
+                  ) : (
+                    item.detailUseYn ?? ""
+                  )}
                 </td>
               </tr>
             ))}
@@ -258,23 +294,28 @@ const EditableTableCellRenderer = ({
   );
 };
 
+/** B002 그리드 패널 — 펼침 테이블, 세부권한 모달, 저장 */
 const GridPanelB002 = ({
   rowData,
   loading,
   searched,
   isEditing,
   saving,
+  syncing,
+  preserveViewOnDetailSync = true,
   onStartEdit,
   onSave,
   onCancelEdit,
   onDetailChange,
+  onSyncRowDetails,
 }) => {
   const [showAll] = useState(true);
   const gridRef = useRef(null);
   const [expandedRowIds, setExpandedRowIds] = useState(() => new Set());
   const [rowHeights, setRowHeights] = useState({});
-  const detailAuthOptions = useMemo(() => getDetailAuthOptions(), []);
+  const [modalRow, setModalRow] = useState(null);
 
+  /** 단일 row 펼침/접기 토글 */
   const toggleRowExpand = useCallback((rowId) => {
     if (!rowId) return;
     setExpandedRowIds((prev) => {
@@ -292,16 +333,19 @@ const GridPanelB002 = ({
     });
   }, []);
 
+  /** 전체 row 펼침 */
   const expandAllRows = useCallback(() => {
     const ids = rowData.map((row) => row?.id).filter(Boolean);
     setExpandedRowIds(new Set(ids));
   }, [rowData]);
 
+  /** 전체 row 접기 */
   const collapseAllRows = useCallback(() => {
     setExpandedRowIds(new Set());
     setRowHeights({});
   }, []);
 
+  /** 헤더 화살표 — 전체 펼침/접기 토글 */
   const toggleAllRows = useCallback(() => {
     const ids = rowData.map((row) => row?.id).filter(Boolean);
     if (ids.length === 0) return;
@@ -310,11 +354,13 @@ const GridPanelB002 = ({
     else expandAllRows();
   }, [rowData, expandedRowIds, expandAllRows, collapseAllRows]);
 
+  /** 모든 row가 펼쳐졌는지 여부 */
   const isAllExpanded = useMemo(() => {
     const ids = rowData.map((row) => row?.id).filter(Boolean);
     return ids.length > 0 && ids.every((id) => expandedRowIds.has(id));
   }, [rowData, expandedRowIds]);
 
+  /** 펼침 테이블 높이 변경 시 row별 높이 상태 저장 */
   const handleRowHeightChange = useCallback((rowId, height) => {
     setRowHeights((prev) => {
       if (prev[rowId] === height) return prev;
@@ -322,25 +368,137 @@ const GridPanelB002 = ({
     });
   }, []);
 
+  /** 세부권한 선택 모달 열기 */
+  const handleOpenDetailModal = useCallback((row) => {
+    if (!row) return;
+    setModalRow(row);
+  }, []);
+
+  /** 세부권한 선택 모달 닫기 */
+  const handleCloseDetailModal = useCallback(() => {
+    if (syncing) return;
+    setModalRow(null);
+  }, [syncing]);
+
+  const pendingScrollRestoreRef = useRef(null);
+  const rowIdSignatureRef = useRef("");
+
+  /** AG Grid 세로 스크롤 영역 DOM 조회 */
+  const getBodyViewport = useCallback(() => {
+    const api = gridRef.current?.api;
+    return (
+      api?.gridBodyCtrl?.eBodyViewport ??
+      gridRef.current?.eGridDiv?.querySelector(".ag-body-viewport") ??
+      null
+    );
+  }, []);
+
+  /** 저장된 스크롤 위치·행 인덱스로 그리드 뷰 복원 */
+  const restoreGridView = useCallback(() => {
+    const pending = pendingScrollRestoreRef.current;
+    if (!pending) return;
+
+    const api = gridRef.current?.api;
+    if (!api) return;
+
+    if (pending.rowIndex >= 0) {
+      api.ensureIndexVisible(pending.rowIndex, pending.position ?? "middle");
+    }
+
+    const viewport = pending.viewport ?? getBodyViewport();
+    if (viewport && pending.scrollTop != null) {
+      viewport.scrollTop = pending.scrollTop;
+    }
+
+    pendingScrollRestoreRef.current = null;
+  }, [getBodyViewport]);
+
+  /** 현재 스크롤 위치와 대상 row 인덱스 스냅샷 저장 */
+  const captureGridView = useCallback(
+    (rowId) => {
+      const api = gridRef.current?.api;
+      if (!api) return null;
+
+      const viewport = getBodyViewport();
+      let rowIndex = -1;
+      api.forEachNode((node) => {
+        if (node.data?.id === rowId) {
+          rowIndex = node.rowIndex ?? -1;
+        }
+      });
+
+      return {
+        rowIndex,
+        scrollTop: viewport?.scrollTop ?? 0,
+        viewport,
+        position: "middle",
+      };
+    },
+    [getBodyViewport]
+  );
+
+  /**
+   * 모달 확인 — t2 동기화 API 호출
+   * preserveViewOnDetailSync=true 이면 펼침·스크롤 유지
+   */
+  const handleConfirmDetailModal = useCallback(
+    async (row, selectedDetails) => {
+      const snapshot = preserveViewOnDetailSync ? captureGridView(row.id) : null;
+      try {
+        await onSyncRowDetails?.(row, selectedDetails);
+        setModalRow(null);
+
+        if (preserveViewOnDetailSync) {
+          setExpandedRowIds((prev) => {
+            const next = new Set(prev);
+            next.add(row.id);
+            return next;
+          });
+          setRowHeights((prev) => {
+            const next = { ...prev };
+            delete next[row.id];
+            return next;
+          });
+
+          if (snapshot) {
+            pendingScrollRestoreRef.current = snapshot;
+          }
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => restoreGridView());
+          });
+        } else {
+          gridRef.current?.api?.resetRowHeights();
+          gridRef.current?.api?.refreshCells({ force: true });
+        }
+      } catch (err) {
+        window.alert(err?.message ?? "세부권한 저장에 실패했습니다.");
+      }
+    },
+    [onSyncRowDetails, captureGridView, restoreGridView, preserveViewOnDetailSync]
+  );
+
+  /** 펼침 셀 렌더러에 전달할 공통 params */
   const getExpandCellParams = useCallback(
     (params) => ({
       isExpanded: expandedRowIds.has(params.data?.id),
       isEditing,
-      detailAuthOptions,
       onToggle: toggleRowExpand,
       onHeightChange: handleRowHeightChange,
       onDetailChange,
+      onOpenDetailModal: handleOpenDetailModal,
     }),
     [
       expandedRowIds,
       isEditing,
-      detailAuthOptions,
       toggleRowExpand,
       handleRowHeightChange,
       onDetailChange,
+      handleOpenDetailModal,
     ]
   );
 
+  /** 헤더 전체 펼침 컴포넌트 params */
   const getExpandHeaderParams = useMemo(
     () => ({
       isAllExpanded,
@@ -349,6 +507,7 @@ const GridPanelB002 = ({
     [isAllExpanded, toggleAllRows]
   );
 
+  /** 펼침 상태·수정 모드 변경 시 그리드 높이/셀 갱신 */
   useEffect(() => {
     const api = gridRef.current?.api;
     if (!api) return;
@@ -357,15 +516,32 @@ const GridPanelB002 = ({
     api.refreshHeader();
   }, [expandedRowIds, isEditing]);
 
+  /** row 높이 변경 시 AG Grid 높이 재계산 (옵션 켜면 스크롤 복원) */
   useEffect(() => {
     gridRef.current?.api?.resetRowHeights();
-  }, [rowHeights]);
+    if (preserveViewOnDetailSync && pendingScrollRestoreRef.current) {
+      requestAnimationFrame(() => restoreGridView());
+    }
+  }, [rowHeights, restoreGridView, preserveViewOnDetailSync]);
 
+  /** 조회 데이터 변경 시 초기 펼침 상태 설정 */
   useEffect(() => {
     if (!rowData?.length) {
       setExpandedRowIds(new Set());
       setRowHeights({});
+      rowIdSignatureRef.current = "";
       return;
+    }
+
+    if (preserveViewOnDetailSync) {
+      const signature = rowData
+        .map((row) => row?.id)
+        .filter(Boolean)
+        .join("|");
+      if (signature === rowIdSignatureRef.current) {
+        return;
+      }
+      rowIdSignatureRef.current = signature;
     }
 
     if (showAll) {
@@ -375,7 +551,7 @@ const GridPanelB002 = ({
       setExpandedRowIds(new Set());
       setRowHeights({});
     }
-  }, [rowData, showAll]);
+  }, [rowData, showAll, preserveViewOnDetailSync]);
 
   const columnDefs = useMemo(
     () => [
@@ -465,6 +641,7 @@ const GridPanelB002 = ({
     [expandedRowIds]
   );
 
+  /** AG Grid 동적 row 높이 계산 */
   const getRowHeight = useCallback(
     (params) => {
       const id = params.data?.id;
@@ -527,6 +704,7 @@ const GridPanelB002 = ({
             ref={gridRef}
             key="b002-auth-grid"
             rowData={rowData}
+            getRowId={(params) => String(params.data?.id ?? "")}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
             rowClassRules={rowClassRules}
@@ -542,6 +720,14 @@ const GridPanelB002 = ({
       {searched && !loading && (
         <p className="grid-count">총 {rowData.length}건</p>
       )}
+
+      <DetailSelectModal
+        open={!!modalRow}
+        row={modalRow}
+        saving={syncing}
+        onClose={handleCloseDetailModal}
+        onConfirm={handleConfirmDetailModal}
+      />
     </div>
   );
 };

@@ -1,11 +1,9 @@
 /**
  * useGrid - AG Grid 목록 데이터 조회/초기화 커스텀 훅
- * 백엔드 없이 MOCK_AUTH_EXCEL_ROWS 목 데이터만 사용합니다.
+ * B001Page에서 사용하며, GridPanel에 rowData·loading·searched를 전달합니다.
  */
 import { useState, useCallback } from "react";
-import { MOCK_AUTH_EXCEL_ROWS, buildAuthGridRows } from "../data/mockAuthData";
-
-export { MOCK_AUTH_EXCEL_ROWS } from "../data/mockAuthData";
+import { fetchGridData } from "../api/B001Api";
 
 export const useGrid = () => {
   const [rowData, setRowData] = useState([]);
@@ -14,23 +12,17 @@ export const useGrid = () => {
   const [error, setError] = useState(null);
 
   /**
-   * 조회 버튼 클릭 시 목 데이터를 그리드 형태로 변환해 표시
-   * @param {Object} params - 부서(departmentCode) 등 조회 조건 (선택)
+   * 그리드 데이터 조회 (조회 버튼 클릭 시 B001Page.handleSearch에서 호출)
+   * @param {Object} params - getSearchParams()가 반환한 조회 조건 (week, departmentCode 등)
    */
   const search = useCallback(async (params) => {
     setLoading(true);
     setError(null);
     try {
-      let rows = buildAuthGridRows(MOCK_AUTH_EXCEL_ROWS);
-
-      // 부서 필터 (departmentCode = 부서명)
-      if (params?.departmentCode) {
-        rows = rows.filter((row) => row.dept === params.departmentCode);
-      }
-
-      setRowData(rows);
+      const response = await fetchGridData(params);
+      setRowData(response?.data ?? []);
       setSearched(true);
-      return { data: rows, totalCount: rows.length };
+      return response;
     } catch (err) {
       setError(err?.message ?? "조회 중 오류가 발생했습니다.");
       setRowData([]);

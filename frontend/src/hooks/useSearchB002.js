@@ -1,18 +1,25 @@
 /**
- * useSearch - 조회 조건(필터) 상태 및 옵션 API 관리 커스텀 훅
- * 6개 필터의 값(filters)과 셀렉트/라디오/체크박스 옵션 목록을 관리합니다.
- * B001Page → SearchPanel로 state와 핸들러를 전달합니다.
+ * B002 전용 조회 조건 훅 — 부서 목록은 Oracle API에서 로드
  */
 import { useState, useEffect, useCallback } from "react";
-import {
-  fetchGridDepartments,
-  fetchGridSections,
-  fetchGridCategories,
-  fetchGridStatuses,
-  fetchGridTypes,
-} from "../api/B001Api";
+import { fetchB002Departments } from "../api/B002Api";
 import { getTodayWeekCode } from "../utils/weekUtil";
 
+const B002_SECTIONS = [{ code: "ALL", name: "전체" }];
+const B002_CATEGORIES = [
+  { code: "C01", name: "일반" },
+  { code: "C02", name: "긴급" },
+];
+const B002_STATUSES = [
+  { code: "Y", name: "사용" },
+  { code: "N", name: "미사용" },
+];
+const B002_TYPES = [
+  { code: "T01", name: "유형A" },
+  { code: "T02", name: "유형B" },
+];
+
+/** B002 검색 조건 초기값 생성 */
 const createInitialFilters = () => ({
   week: getTodayWeekCode(),
   departmentCode: "",
@@ -22,7 +29,7 @@ const createInitialFilters = () => ({
   typeCodes: [],
 });
 
-export const useSearch = () => {
+export const useSearchB002 = () => {
   const [filters, setFilters] = useState(createInitialFilters);
   const [departments, setDepartments] = useState([]);
   const [sections, setSections] = useState([]);
@@ -31,46 +38,37 @@ export const useSearch = () => {
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const loadDepartments = useCallback(async (week) => {
-    const res = await fetchGridDepartments({ week });
+  /** 부서 목록 API 조회 (Oracle TB_B002_AUTH_EXCEL) */
+  const loadDepartments = useCallback(async () => {
+    const res = await fetchB002Departments();
     const list = res?.data ?? [];
     setDepartments(list);
     return list;
   }, []);
 
-  const loadSections = useCallback(async (week, departmentCode) => {
-    if (!week || !departmentCode) {
-      setSections([]);
-      return [];
-    }
-    const res = await fetchGridSections({ week, departmentCode });
-    const list = res?.data ?? [];
-    setSections(list);
-    return list;
+  /** 섹션 옵션 로드 */
+  const loadSections = useCallback(async () => {
+    setSections(B002_SECTIONS);
+    return B002_SECTIONS;
   }, []);
 
+  /** 카테고리·상태·유형 정적 옵션 로드 */
   const loadStaticOptions = useCallback(async () => {
-    const [categoryRes, statusRes, typeRes] = await Promise.all([
-      fetchGridCategories(),
-      fetchGridStatuses(),
-      fetchGridTypes(),
-    ]);
-    setCategories(categoryRes?.data ?? []);
-    setStatuses(statusRes?.data ?? []);
-    setTypes(typeRes?.data ?? []);
-    return {
-      statuses: statusRes?.data ?? [],
-    };
+    setCategories(B002_CATEGORIES);
+    setStatuses(B002_STATUSES);
+    setTypes(B002_TYPES);
+    return { statuses: B002_STATUSES };
   }, []);
 
+  /** 마운트 시 부서·옵션 초기화 및 기본 검색 조건 설정 */
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       try {
         const week = getTodayWeekCode();
-        const deptList = await loadDepartments(week);
+        const deptList = await loadDepartments();
         const firstDept = deptList[0]?.code ?? "";
-        const sectionList = firstDept ? await loadSections(week, firstDept) : [];
+        const sectionList = await loadSections();
         const { statuses: statusList } = await loadStaticOptions();
 
         setFilters({
@@ -88,13 +86,13 @@ export const useSearch = () => {
     init();
   }, [loadDepartments, loadSections, loadStaticOptions]);
 
+  /** 주차 변경 — 부서·섹션 재설정 */
   const handleWeekChange = async (week) => {
     setLoading(true);
     try {
-      const deptList = await loadDepartments(week);
+      const deptList = await loadDepartments();
       const firstDept = deptList[0]?.code ?? "";
-      const sectionList = firstDept ? await loadSections(week, firstDept) : [];
-
+      const sectionList = await loadSections();
       setFilters((prev) => ({
         ...prev,
         week,
@@ -106,10 +104,11 @@ export const useSearch = () => {
     }
   };
 
+  /** 부서 변경 — 섹션 재설정 */
   const handleDepartmentChange = async (departmentCode) => {
     setLoading(true);
     try {
-      const sectionList = await loadSections(filters.week, departmentCode);
+      const sectionList = await loadSections();
       setFilters((prev) => ({
         ...prev,
         departmentCode,
@@ -120,29 +119,34 @@ export const useSearch = () => {
     }
   };
 
+  /** 섹션 변경 */
   const handleSectionChange = (sectionCode) => {
     setFilters((prev) => ({ ...prev, sectionCode }));
   };
 
+  /** 카테고리(복수) 변경 */
   const handleCategoryChange = (categoryCodes) => {
     setFilters((prev) => ({ ...prev, categoryCodes }));
   };
 
+  /** 사용여부 변경 */
   const handleStatusChange = (statusCode) => {
     setFilters((prev) => ({ ...prev, statusCode }));
   };
 
+  /** 유형(복수) 변경 */
   const handleTypeChange = (typeCodes) => {
     setFilters((prev) => ({ ...prev, typeCodes }));
   };
 
+  /** 검색 조건 초기화 */
   const resetFilters = async () => {
     setLoading(true);
     try {
       const week = getTodayWeekCode();
-      const deptList = await loadDepartments(week);
+      const deptList = await loadDepartments();
       const firstDept = deptList[0]?.code ?? "";
-      const sectionList = firstDept ? await loadSections(week, firstDept) : [];
+      const sectionList = await loadSections();
       const { statuses: statusList } = await loadStaticOptions();
 
       setFilters({
@@ -158,6 +162,7 @@ export const useSearch = () => {
     }
   };
 
+  /** API 조회용 검색 파라미터 객체 반환 */
   const getSearchParams = () => ({
     week: filters.week,
     departmentCode: filters.departmentCode,

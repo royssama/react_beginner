@@ -1,0 +1,4 @@
+# 로컬 DB 계정 (git에 올리지 마세요)
+# 이 파일을 application-local.properties 로 복사 후 값 입력
+spring.datasource.username=여기에_계정_입력
+spring.datasource.password=여기에_비밀번호_입력
