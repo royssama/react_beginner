@@ -349,6 +349,8 @@ const GridPanelB002 = ({
     [isAllExpanded, toggleAllRows]
   );
 
+  // 펼침/수정모드 변경 시에만 그리드 갱신.
+  // 체크박스 편집으로 rowData만 바뀔 때는 여기로 들어오면 안 됨 (스크롤 점프 방지).
   useEffect(() => {
     const api = gridRef.current?.api;
     if (!api) return;
@@ -361,21 +363,34 @@ const GridPanelB002 = ({
     gridRef.current?.api?.resetRowHeights();
   }, [rowHeights]);
 
+  // 조회 결과 "행 id 집합"이 바뀔 때만 펼침 초기화.
+  // 체크박스/셀렉트 편집은 rowData 참조만 바뀌고 id 집합은 같으므로 여기 재실행되면 안 됨.
+  // (기존: [rowData, showAll] 의존 → 체크할 때마다 setExpandedRowIds(new Set) →
+  //  resetRowHeights/refreshCells → 스크롤이 맨 위로 이동)
+  const rowIdsKey = useMemo(
+    () =>
+      (rowData ?? [])
+        .map((row) => row?.id)
+        .filter(Boolean)
+        .join("|"),
+    [rowData]
+  );
+
   useEffect(() => {
-    if (!rowData?.length) {
+    if (!rowIdsKey) {
       setExpandedRowIds(new Set());
       setRowHeights({});
       return;
     }
 
+    const ids = rowIdsKey.split("|");
     if (showAll) {
-      const ids = rowData.map((row) => row?.id).filter(Boolean);
       setExpandedRowIds(new Set(ids));
     } else {
       setExpandedRowIds(new Set());
       setRowHeights({});
     }
-  }, [rowData, showAll]);
+  }, [rowIdsKey, showAll]);
 
   const columnDefs = useMemo(
     () => [
@@ -530,6 +545,7 @@ const GridPanelB002 = ({
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
             rowClassRules={rowClassRules}
+            getRowId={(params) => String(params.data?.id ?? "")}
             getRowHeight={getRowHeight}
             domLayout="normal"
             animateRows
