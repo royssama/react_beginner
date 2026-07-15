@@ -78,6 +78,15 @@ height: 100%;
   .ag-cell.cell-arrow-top {
     align-items: flex-start !important;
   }
+
+  /* 행 hover 시 펼침 테이블 배경색 변경 (ag-row-hover는 AG Grid가 마우스 오버 시 부여) */
+  .ag-row:hover .table-cell-renderer th,
+  .ag-row:hover .table-cell-renderer td,
+  .ag-row.ag-row-hover .table-cell-renderer th,
+  .ag-row.ag-row-hover .table-cell-renderer td {
+    background-color: #e8f4fc !important;
+    transition: background-color 0.15s ease;
+  }
 `;
 
 
@@ -276,7 +285,7 @@ const TableCellRenderer = ({ data, isExpanded, onHeightChange }) => {
 
 const GridPanel = ({ rowData, loading, searched }) => {
   // H01 — true: 조회 직후 전체 펼침 / false: 조회 직후 전체 접힘 → [H02] useEffect에서 사용
-  const [showAll, setShowAll] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const gridRef = useRef(null);
   // S01 — 현재 펼쳐진 행 id 목록 (Set). 예: Set {"1", "3", "5"}
   const [expandedRowIds, setExpandedRowIds] = useState(() => new Set());
