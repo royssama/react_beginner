@@ -65,6 +65,29 @@ body {
   gap: 8px;
 }
 
+.always-expand-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.always-expand-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.always-expand-toggle:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .search-panel,
 .grid-panel {
   background: #fff;

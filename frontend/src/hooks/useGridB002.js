@@ -1,8 +1,8 @@
 /**
  * useGridB002 - B002 그리드 조회 + 세부권한 테이블 수정/저장
  */
-import { useState, useCallback, useRef } from "react";
-import { fetchB002GridData, saveB002DetailChanges, syncB002RowDetails } from "../api/B002Api";
+import { useState, useCallback, useRef, useMemo } from "react";
+import { fetchB002GridData, saveB002DetailChanges } from "../api/B002Api";
 
 /** rowData 깊은 복사 */
 const cloneRows = (rows) => JSON.parse(JSON.stringify(rows));
@@ -53,7 +53,6 @@ export const useGridB002 = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const originalRowDataRef = useRef([]);
 
   /** 그리드 조회 — API 호출 후 rowData·원본 스냅샷 저장 */
@@ -111,40 +110,6 @@ export const useGridB002 = () => {
     );
   }, []);
 
-  /**
-   * 팝업 확인 — 선택된 DETAIL_AUTH 기준 t2 INSERT/DELETE 동기화
-   * 성공 시 해당 row의 details만 갱신
-   */
-  const syncRowDetails = useCallback(async (row, selectedDetails) => {
-    setSyncing(true);
-    setError(null);
-    try {
-      const response = await syncB002RowDetails({
-        empNo: row.empNo,
-        empName: row.name,
-        dept: row.dept,
-        authName: row.authName,
-        authGrant: row.authGrant,
-        useYn: row.useYn,
-        parentDetailId: row.parentDetailId ?? row.details?.[0]?.detailId,
-        selectedDetails,
-      });
-
-      const details = response?.data ?? [];
-      const updateRows = (rows) =>
-        rows.map((item) => (item.id === row.id ? { ...item, details } : item));
-
-      setRowData((prev) => updateRows(prev));
-      originalRowDataRef.current = updateRows(originalRowDataRef.current);
-      return response;
-    } catch (err) {
-      setError(err?.message ?? "세부권한 동기화 중 오류가 발생했습니다.");
-      throw err;
-    } finally {
-      setSyncing(false);
-    }
-  }, []);
-
   /** 변경된 세부권한 저장 API 호출 */
   const save = useCallback(async () => {
     const changes = collectChangedDetails(rowData, originalRowDataRef.current);
@@ -170,6 +135,12 @@ export const useGridB002 = () => {
     }
   }, [rowData]);
 
+  /** 원본 대비 DETAIL_AUTH / DETAIL_USE_YN 변경 여부 */
+  const hasChanges = useMemo(
+    () => collectChangedDetails(rowData, originalRowDataRef.current).length > 0,
+    [rowData]
+  );
+
   return {
     rowData,
     loading,
@@ -177,13 +148,12 @@ export const useGridB002 = () => {
     error,
     isEditing,
     saving,
-    syncing,
+    hasChanges,
     search,
     clearGrid,
     startEdit,
     cancelEdit,
     updateDetail,
-    syncRowDetails,
     save,
   };
 };

@@ -4,7 +4,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import styled from "styled-components";
 import arrowImg from "./arrow.png";
-import { B002_GRID_OPTIONS } from "../config/b002GridOptions";
+import { B003_GRID_OPTIONS } from "../config/b003GridOptions";
 import { getCookieBoolean, setCookie } from "../utils/cookieUtil";
 
 /** 점수 필드 추출 (cellStyle 조건용) */
@@ -170,16 +170,76 @@ const ArrowHeaderComponent = ({ isAllExpanded, onToggleAll }) => {
   );
 };
 
-/** B002 — 펼침 테이블 (DETAIL_AUTH 텍스트·DETAIL_USE_YN 체크 수정) */
+/** B003 — 펼침 테이블 (표시값 = rowData + changeDataset 병합, 입력은 로컬 state) */
+const DetailAuthInput = ({ value, onCommit, stopGridEvent }) => {
+  const [text, setText] = useState(value ?? "");
+  useEffect(() => {
+    setText(value ?? "");
+  }, [value]);
+  return (
+    <input
+      type="text"
+      className="detail-select"
+      value={text}
+      onMouseDown={stopGridEvent}
+      onClick={stopGridEvent}
+      onChange={(e) => {
+        const next = e.target.value;
+        setText(next);
+        onCommit?.(next);
+      }}
+    />
+  );
+};
+
+/** 체크박스도 로컬 state 사용 (AG Grid 셀이 changeDataset만으로는 다시 안 그려짐) */
+const DetailUseYnCheckbox = ({ checked, onCommit, stopGridEvent }) => {
+  const [on, setOn] = useState(!!checked);
+  useEffect(() => {
+    setOn(!!checked);
+  }, [checked]);
+  return (
+    <input
+      type="checkbox"
+      checked={on}
+      onMouseDown={stopGridEvent}
+      onClick={stopGridEvent}
+      onChange={(e) => {
+        const next = e.target.checked;
+        setOn(next);
+        onCommit?.(next ? "Y" : "N");
+      }}
+    />
+  );
+};
+
 const EditableTableCellRenderer = ({
   data,
   isExpanded,
   isEditing,
   onHeightChange,
   onDetailChange,
+  getChangeDataset,
+  changeDataset: changeDatasetProp,
 }) => {
   const containerRef = useRef(null);
   const details = data?.details ?? [];
+  const changeDataset =
+    (typeof getChangeDataset === "function" ? getChangeDataset() : null) ??
+    changeDatasetProp ??
+    {};
+
+  /** 원본 detail + changeDataset.after 병합 */
+  const getDisplayDetail = (item, index) => {
+    const key = String(data.id) + ":" + String(index);
+    const change = changeDataset?.[key];
+    if (!change) return item;
+    return {
+      ...item,
+      detailAuth: change.after.detailAuth,
+      detailUseYn: change.after.detailUseYn,
+    };
+  };
 
   useEffect(() => {
     if (!isExpanded || !data?.id) return;
@@ -214,56 +274,48 @@ const EditableTableCellRenderer = ({
         >
           <thead>
             <tr>
-             <th style={{ width: "10%" }}>DETAIL_USE_YN</th>
+              <th style={{ width: "10%" }}>DETAIL_USE_YN</th>
               <th style={{ width: "18%" }}>DETAIL_ID</th>
               <th style={{ width: "28%" }}>DETAIL_NM</th>
               <th style={{ width: "34%" }}>DETAIL_AUTH</th>
             </tr>
           </thead>
           <tbody>
-            {details.map((item, index) => (
-              <tr key={`${data.id}-${index}-${item.detailId ?? ""}`}>
-                 <td style={{ textAlign: "center" }}>
-                  {isEditing ? (
-                    <input
-                      type="checkbox"
-                      checked={item.detailUseYn === "Y"}
-                      onMouseDown={stopGridEvent}
-                      onClick={stopGridEvent}
-                      onChange={(e) =>
-                        onDetailChange?.(
-                          data.id,
-                          index,
-                          "detailUseYn",
-                          e.target.checked ? "Y" : "N"
-                        )
-                      }
-                    />
-                  ) : (
-                    item.detailUseYn ?? ""
-                  )}
-                </td>
-                <td>{item.detailId ?? ""}</td>
-                <td>{item.detailNm ?? ""}</td>
-                <td>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      className="detail-select"
-                      value={item.detailAuth ?? ""}
-                      onMouseDown={stopGridEvent}
-                      onClick={stopGridEvent}
-                      onChange={(e) =>
-                        onDetailChange?.(data.id, index, "detailAuth", e.target.value)
-                      }
-                    />
-                  ) : (
-                    item.detailAuth ?? ""
-                  )}
-                </td>
-               
-              </tr>
-            ))}
+            {details.map((item, index) => {
+              const display = getDisplayDetail(item, index);
+              return (
+                <tr key={String(data.id) + "-" + String(index) + "-" + String(item.detailId ?? "")}>
+                  <td style={{ textAlign: "center" }}>
+                    {isEditing ? (
+                      <DetailUseYnCheckbox
+                        checked={display.detailUseYn === "Y"}
+                        stopGridEvent={stopGridEvent}
+                        onCommit={(next) =>
+                          onDetailChange?.(data.id, index, "detailUseYn", next)
+                        }
+                      />
+                    ) : (
+                      display.detailUseYn ?? ""
+                    )}
+                  </td>
+                  <td>{display.detailId ?? ""}</td>
+                  <td>{display.detailNm ?? ""}</td>
+                  <td>
+                    {isEditing ? (
+                      <DetailAuthInput
+                        value={display.detailAuth ?? ""}
+                        stopGridEvent={stopGridEvent}
+                        onCommit={(next) =>
+                          onDetailChange?.(data.id, index, "detailAuth", next)
+                        }
+                      />
+                    ) : (
+                      display.detailAuth ?? ""
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
@@ -271,9 +323,10 @@ const EditableTableCellRenderer = ({
   );
 };
 
-/** B002 그리드 패널 — 펼침 테이블, DETAIL_USE_YN 수정/저장 */
-const GridPanelB002 = ({
+/** B003 그리드 패널 — changeDataset 기반 수정/저장 */
+const GridPanelB003 = ({
   rowData,
+  changeDataset = {},
   loading,
   searched,
   isEditing,
@@ -284,8 +337,10 @@ const GridPanelB002 = ({
   onCancelEdit,
   onDetailChange,
 }) => {
+  const changeDatasetRef = useRef(changeDataset);
+  changeDatasetRef.current = changeDataset;
   const [showAll, setShowAll] = useState(() =>
-    getCookieBoolean(B002_GRID_OPTIONS.alwaysExpandCookieKey, true)
+    getCookieBoolean(B003_GRID_OPTIONS.alwaysExpandCookieKey, true)
   );
   const gridRef = useRef(null);
   const [expandedRowIds, setExpandedRowIds] = useState(() => new Set());
@@ -296,7 +351,7 @@ const GridPanelB002 = ({
   const handleAlwaysExpandToggle = useCallback(
     (checked) => {
       setShowAll(checked);
-      setCookie(B002_GRID_OPTIONS.alwaysExpandCookieKey, checked ? "true" : "false");
+      setCookie(B003_GRID_OPTIONS.alwaysExpandCookieKey, checked ? "true" : "false");
 
       if (checked) {
         const ids = rowData.map((row) => row?.id).filter(Boolean);
@@ -370,6 +425,7 @@ const GridPanelB002 = ({
       onToggle: toggleRowExpand,
       onHeightChange: handleRowHeightChange,
       onDetailChange,
+      getChangeDataset: () => changeDatasetRef.current,
     }),
     [
       expandedRowIds,
@@ -588,7 +644,7 @@ const GridPanelB002 = ({
         <GridWrapper>
           <AgGridReact
             ref={gridRef}
-            key="b002-auth-grid"
+            key="b003-auth-grid"
             rowData={rowData}
             getRowId={(params) => String(params.data?.id ?? "")}
             columnDefs={columnDefs}
@@ -610,4 +666,4 @@ const GridPanelB002 = ({
   );
 };
 
-export default GridPanelB002;
+export default GridPanelB003;

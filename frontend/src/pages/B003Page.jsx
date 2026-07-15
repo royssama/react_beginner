@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import SearchPanel from "../components/SearchPanel";
-import GridPanelB002 from "../components/GridPanelB002";
-import { useSearchB002 } from "../hooks/useSearchB002";
-import { useGridB002 } from "../hooks/useGridB002";
+import GridPanelB003 from "../components/GridPanelB003";
+import { useSearchB003 } from "../hooks/useSearchB003";
+import { useGridB003 } from "../hooks/useGridB003";
 
-/** B002 화면 — 조회 패널 + 그리드 패널 조합 */
-const B002Page = () => {
+/** B003 화면 — 조회 패널 + 그리드 패널 조합 */
+const B003Page = () => {
   const {
     filters,
     departments,
@@ -22,10 +22,11 @@ const B002Page = () => {
     handleTypeChange,
     resetFilters,
     getSearchParams,
-  } = useSearchB002();
+  } = useSearchB003();
 
   const {
     rowData,
+    changeDataset,
     loading: gridLoading,
     searched,
     isEditing,
@@ -37,7 +38,7 @@ const B002Page = () => {
     cancelEdit,
     updateDetail,
     save,
-  } = useGridB002();
+  } = useGridB003();
 
   /** 조회 버튼 — 검색 조건으로 그리드 데이터 조회 */
   const handleSearch = async () => {
@@ -60,8 +61,8 @@ const B002Page = () => {
   }, [loading, filters.departmentCode, search, getSearchParams]);
 
   return (
-    <div className="page b002-page">
-      <h1 className="page-title">B002 - AG Grid 조회/수정 화면</h1>
+    <div className="page b003-page">
+      <h1 className="page-title">B003 - AG Grid 조회/수정 화면</h1>
       <SearchPanel
         filters={filters}
         departments={departments}
@@ -80,8 +81,9 @@ const B002Page = () => {
         onReset={handleReset}
         gridLoading={gridLoading || saving}
       />
-      <GridPanelB002
+      <GridPanelB003
         rowData={rowData}
+        changeDataset={changeDataset}
         loading={gridLoading}
         searched={searched}
         isEditing={isEditing}
@@ -96,4 +98,4 @@ const B002Page = () => {
   );
 };
 
-export default B002Page;
+export default B003Page;
