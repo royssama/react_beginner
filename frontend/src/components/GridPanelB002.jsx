@@ -174,7 +174,18 @@ const EditableTableCellRenderer = ({
   onDetailChange,
 }) => {
   const containerRef = useRef(null);
-  const details = data?.details ?? [];
+  // AG Grid 셀은 nested details 변경 시 props가 바로 안 바뀌는 경우가 있음.
+  // 화면 체크 상태는 localDetails로 즉시 반영하고, 저장용 데이터는 onDetailChange로 부모에 전달.
+  const [localDetails, setLocalDetails] = useState(() => data?.details ?? []);
+  const syncedRowIdRef = useRef(data?.id);
+
+  // 다른 행으로 바뀌거나(수정 취소/저장 등) 그리드가 새 details를 내려줄 때만 동기화.
+  // ※ data.details를 매 렌더 무조건 넣으면, 클릭 직후 아직 옛값(N)인 props가 local을 덮어 두 번 클릭 버그가 남음.
+  useEffect(() => {
+    const rowChanged = syncedRowIdRef.current !== data?.id;
+    if (rowChanged) syncedRowIdRef.current = data?.id;
+    setLocalDetails(data?.details ?? []);
+  }, [data?.id, isEditing]);
 
   useEffect(() => {
     if (!isExpanded || !data?.id) return;
@@ -189,10 +200,30 @@ const EditableTableCellRenderer = ({
     const observer = new ResizeObserver(measure);
     if (containerRef.current) observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [isExpanded, data, details, isEditing, onHeightChange]);
+  }, [isExpanded, data?.id, localDetails, isEditing, onHeightChange]);
 
   const stopGridEvent = (e) => {
     e.stopPropagation();
+  };
+
+  const handleDetailAuthChange = (index, value) => {
+    setLocalDetails((prev) =>
+      prev.map((detail, i) =>
+        i === index ? { ...detail, detailAuth: value } : detail
+      )
+    );
+    onDetailChange?.(data.id, index, "detailAuth", value);
+  };
+
+  const handleUseYnChange = (index, checked) => {
+    const value = checked ? "Y" : "N";
+    // 화면은 즉시 반영 (item.detailUseYn / authUseYn 로그가 한 박자 늦어도 UI는 맞춤)
+    setLocalDetails((prev) =>
+      prev.map((detail, i) =>
+        i === index ? { ...detail, detailUseYn: value } : detail
+      )
+    );
+    onDetailChange?.(data.id, index, "detailUseYn", value);
   };
 
   return (
@@ -212,7 +243,7 @@ const EditableTableCellRenderer = ({
             </tr>
           </thead>
           <tbody>
-            {details.map((item, index) => (
+            {localDetails.map((item, index) => (
               <tr key={item.detailId ?? `${data.id}-${index}`}>
                 <td>
                   <select
@@ -220,10 +251,7 @@ const EditableTableCellRenderer = ({
                     value={item.detailAuth}
                     disabled={!isEditing}
                     onMouseDown={stopGridEvent}
-                    onClick={stopGridEvent}
-                    onChange={(e) =>
-                      onDetailChange?.(data.id, index, "detailAuth", e.target.value)
-                    }
+                    onChange={(e) => handleDetailAuthChange(index, e.target.value)}
                   >
                     {detailAuthOptions.map((opt) => (
                       <option key={opt.code} value={opt.code}>
@@ -238,15 +266,7 @@ const EditableTableCellRenderer = ({
                     checked={item.detailUseYn === "Y"}
                     disabled={!isEditing}
                     onMouseDown={stopGridEvent}
-                    onClick={stopGridEvent}
-                    onChange={(e) =>
-                      onDetailChange?.(
-                        data.id,
-                        index,
-                        "detailUseYn",
-                        e.target.checked ? "Y" : "N"
-                      )
-                    }
+                    onChange={(e) => handleUseYnChange(index, e.target.checked)}
                   />
                 </td>
               </tr>
@@ -322,6 +342,27 @@ const GridPanelB002 = ({
     });
   }, []);
 
+  // 체크/셀렉트 변경: 부모 state 갱신 + AG Grid rowNode도 즉시 갱신.
+  // 스크롤 수정(rowIdsKey) 이후로는 rowData 변경 시 refreshCells가 안 돌아가서
+  // 셀의 item.authUseYn/detailUseYn이 한 박자 늦게 남는 문제(두 번 클릭)가 생김.
+  // resetRowHeights는 호출하지 않음 → 스크롤 유지.
+  const handleDetailChange = useCallback(
+    (rowId, detailIndex, field, value) => {
+      onDetailChange?.(rowId, detailIndex, field, value);
+
+      const api = gridRef.current?.api;
+      if (!api) return;
+      const node = api.getRowNode(String(rowId));
+      if (!node?.data) return;
+
+      const nextDetails = (node.data.details ?? []).map((detail, index) =>
+        index === detailIndex ? { ...detail, [field]: value } : detail
+      );
+      node.setData({ ...node.data, details: nextDetails });
+    },
+    [onDetailChange]
+  );
+
   const getExpandCellParams = useCallback(
     (params) => ({
       isExpanded: expandedRowIds.has(params.data?.id),
@@ -329,7 +370,7 @@ const GridPanelB002 = ({
       detailAuthOptions,
       onToggle: toggleRowExpand,
       onHeightChange: handleRowHeightChange,
-      onDetailChange,
+      onDetailChange: handleDetailChange,
     }),
     [
       expandedRowIds,
@@ -337,7 +378,7 @@ const GridPanelB002 = ({
       detailAuthOptions,
       toggleRowExpand,
       handleRowHeightChange,
-      onDetailChange,
+      handleDetailChange,
     ]
   );
 
@@ -439,6 +480,14 @@ const GridPanelB002 = ({
         field: "authName",
         headerName: "권한이름",
         width: 400,
+        // nested details 변경도 value 변경으로 잡혀야 셀이 갱신됨
+        valueGetter: (params) => {
+          const row = params.data;
+          const detailKey = (row?.details ?? [])
+            .map((d) => `${d.detailId}:${d.detailAuth}:${d.detailUseYn}`)
+            .join(",");
+          return `${row?.authName ?? ""}::${detailKey}`;
+        },
         cellRenderer: EditableTableCellRenderer,
         cellRendererParams: getExpandCellParams,
         cellClassRules: {
