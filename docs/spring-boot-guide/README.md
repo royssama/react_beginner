@@ -1,6 +1,13 @@
 # Spring Boot 가이드
 
-이 프로젝트 백엔드(Spring Boot 2.7.18, Java 8)를 기준으로 한 학습 문서입니다.
+이 프로젝트 백엔드의 **목표 스택**을 기준으로 한 학습 문서입니다.
+
+| 항목 | 값 |
+|------|-----|
+| Java | 21 |
+| 빌드 | Gradle |
+| 단순 CRUD | Spring Data JPA + QueryDSL |
+| 복잡한 쿼리 | MyBatis |
 
 **읽는 순서**
 
