@@ -276,7 +276,7 @@ const TableCellRenderer = ({ data, isExpanded, onHeightChange }) => {
 
 const GridPanel = ({ rowData, loading, searched }) => {
   // H01 — true: 조회 직후 전체 펼침 / false: 조회 직후 전체 접힘 → [H02] useEffect에서 사용
-  const [showAll, setShowAll] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const gridRef = useRef(null);
   // S01 — 현재 펼쳐진 행 id 목록 (Set). 예: Set {"1", "3", "5"}
   const [expandedRowIds, setExpandedRowIds] = useState(() => new Set());
