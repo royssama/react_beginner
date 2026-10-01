@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D 자동차 지도 탐험</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="header">
+            <h1>🚗 2D 자동차 지도 탐험</h1>
+            <p>방향키(↑↓←→) 또는 WASD로 자동차를 조종하세요!</p>
+        </div>
+        
+        <div id="map-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+        
+        <div id="info-panel">
+            <div id="coordinates">
+                <span>위치: </span>
+                <span id="pos-x">0</span>, <span id="pos-y">0</span>
+            </div>
+            <div id="current-area">
+                <span>현재 지역: </span>
+                <span id="area-name">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 -->
+    <div id="popup-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="popup-icon"></div>
+            <h2 id="popup-title">건물 이름</h2>
+            <div id="popup-body">
+                <p id="popup-description">설명</p>
+                <div id="popup-details"></div>
+            </div>
+            <button id="popup-close-btn">닫기</button>
+        </div>
+    </div>
+
+    <!-- 미니맵 -->
+    <div id="minimap-container">
+        <canvas id="minimap-canvas"></canvas>
+    </div>
+
+    <!-- 컨트롤 안내 -->
+    <div id="controls-help">
+        <div class="control-key">↑/W</div>
+        <div class="control-row">
+            <div class="control-key">←/A</div>
+            <div class="control-key">↓/S</div>
+            <div class="control-key">→/D</div>
+        </div>
+        <p>Space: 정보 보기</p>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
