@@ -1,0 +1,94 @@
+기능 카테고리,기능,Nexacro Grid,AG Grid Community (무료),AG Grid Enterprise (유료)
+데이터 바인딩,Dataset 바인딩,O,O,O
+데이터 바인딩,양방향 데이터 동기화,O,O,O
+데이터 바인딩,Server-Side Data Model,O (트랜잭션 기반),O (기본),O (고급)
+그리드 구조,Head/Body/Summary Band,O,O,O
+그리드 구조,Multi-Line Row (한 레코드 여러 줄),O,X,X
+그리드 구조,다중 포맷 지원,O,X,X
+그리드 구조,Column Headers,O,O,O
+그리드 구조,Column Groups,O,O,O
+컬럼 관리,컬럼 크기 조절,O,O,O
+컬럼 관리,컬럼 이동,O,O,O
+컬럼 관리,컬럼 고정 (Pinning),O,O,O
+컬럼 관리,가로 스크롤 컬럼 고정,O (setFixedColumn),O,O
+컬럼 관리,컬럼 Spanning,O,O,O
+컬럼 관리,컬럼 자동 생성,O (createFormat),O,O
+컬럼 관리,계산 컬럼 (Calculated Columns),O (expr 속성),X,O
+셀 표현,Text/Edit,O,O,O
+셀 표현,Combo/Dropdown,O,O,O
+셀 표현,CheckBox,O,O,O
+셀 표현,Date Picker,O,O,O
+셀 표현,Image,O,O,O
+셀 표현,Button,O,O,O
+셀 표현,ProgressBar,O,O,O
+셀 표현,Sparklines,X,X,O
+셀 표현,커스텀 컴포넌트,O,O,O
+셀 편집,인라인 편집,O,O,O
+셀 편집,Full Row Editing,O,O,O
+셀 편집,셀 속성 동적 제어,O (setCellProperty),O,O
+셀 편집,편집 타입별 설정,O (edittype),O,O
+셀 편집,Auto Select on Edit,O,O,O
+정렬,단일 컬럼 정렬,O,O,O
+정렬,다중 컬럼 정렬,O,O,O
+정렬,커스텀 정렬,O,O,O
+필터링,텍스트 필터,O (Dataset filter),O,O
+필터링,숫자 필터,O,O,O
+필터링,날짜 필터,O,O,O
+필터링,Quick Filter,O,O,O
+필터링,Set Filter (목록 선택),O,X,O
+필터링,Multi Filter,X,X,O
+필터링,Advanced Filter (수식 기반),O (filterstr),X,O
+필터링,External Filter,O,O,O
+선택 기능,Row 선택,O,O,O
+선택 기능,Multi Row 선택,O (selecttype),O,O
+선택 기능,Cell 선택,O,O,O
+선택 기능,Range Selection,O (multiarea),X,O
+그룹핑/집계,Row Grouping,O (Grouping/Outlineview),X,O
+그룹핑/집계,소계 (Subtotal),O,X,O
+그룹핑/집계,합계/평균/최대/최소 연산,O (Summary Band),X,O
+그룹핑/집계,Aggregation,O (expr),X,O
+그룹핑/집계,Pivoting,X,X,O
+트리 구조,Tree Data,O (displaytype=tree),X,O
+트리 구조,Tree Checkbox,O (treeusecheckbox),X,O
+트리 구조,Expand/Collapse,O,X,O
+Master/Detail,마스터/디테일 뷰,X (별도 구현 필요),X,O
+스크롤/페이징,Pagination,O (별도 구현),O,O
+스크롤/페이징,Infinite Scrolling,O (Smart Scroll),O,O
+스크롤/페이징,Row/Column Virtualization,O,O,O
+스크롤/페이징,Smart Scroll (fastvscrolltype),O,O,O
+셀 병합,수직 병합,O (suppressaliginor),O (rowSpan),O
+셀 병합,수평 병합,O,O (colSpan),O
+클립보드,복사 (Ctrl+C),O,O,O
+클립보드,붙여넣기 (Ctrl+V),O,X,O
+클립보드,Grid 간 복사/붙여넣기,O,X,O
+클립보드,Excel-like 클립보드 동작,O,X,O
+Export/Import,CSV Export,O,O,O
+Export/Import,Excel Export,O (별도 API),X,O
+Export/Import,Excel Import,O,X,X
+차트 연동,Integrated Charts,X,X,O (Bundle)
+차트 연동,Sparklines,X,X,O
+검색,Find (검색 기능),O (findRow/findRowExpr),X,O
+수식,Formula Editor,X,X,O
+수식,Cell 수식 (expr),O,X,O
+테마/스타일링,Built-in Themes,O,O,O
+테마/스타일링,CSS Customization,O,O,O
+테마/스타일링,Theming API,O,O,O
+접근성,ARIA 지원,O,O,O
+접근성,키보드 네비게이션,O,O,O
+접근성,접근성 개선 기능,O (createrowstype 등),O,O
+UI 패널,Tool Panels,X,X,O
+UI 패널,Context Menu (컨텍스트 메뉴),X (별도 구현),X,O
+UI 패널,Column Menu,X (별도 구현),X,O
+UI 패널,Sidebar,X,X,O
+Drag & Drop,Row Drag & Drop,O,O,O
+Drag & Drop,Column Drag & Drop,O,O,O
+AI 기능,AI Toolkit,X,X,O
+AI 기능,MCP Server,X,O,O
+프레임워크 지원,React,X,O,O
+프레임워크 지원,Angular,X,O,O
+프레임워크 지원,Vue,X,O,O
+프레임워크 지원,Vanilla JavaScript,X,O,O
+프레임워크 지원,Nexacro Platform,O,X,X
+라이선스,무료 버전,X (상용),O (MIT),X
+라이선스,상용 라이선스,O,X,O
+기술 지원,공식 기술 지원,O,X,O
