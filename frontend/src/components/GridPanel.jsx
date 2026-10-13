@@ -4,6 +4,8 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import styled from "styled-components";
 import arrowImg from "./arrow.png";
+import CustomFilterWithSorting from "./CustomFilterWithSorting";
+import CustomHeaderWithFilterSort from "./CustomHeaderWithFilterSort";
 const numberFormatter = (p) => (p.value != null ? p.value.toLocaleString() : "");
 
 /** cellClassRules용 — API에 score 없으면 aa2024 값으로 대체 */
@@ -439,6 +441,10 @@ const GridPanel = ({ rowData, loading, searched }) => {
         field: "dept",
         headerName: "부서",
         width: 150,
+        sortable: true,
+        filter: CustomFilterWithSorting,
+        headerComponent: CustomHeaderWithFilterSort,
+        suppressHeaderMenuButton: false,
         cellClassRules: {
           "bg-red": (params) => getScore(params.data) < 60,
           "bg-green": (params) => getScore(params.data) >= 60,
@@ -483,8 +489,10 @@ const GridPanel = ({ rowData, loading, searched }) => {
       { 
         field: "useYn", 
         headerName: "사용여부", 
-        width: 150 ,
-       
+        width: 150,
+        sortable: true,
+        filter: CustomFilterWithSorting,
+        headerComponent: CustomHeaderWithFilterSort,
       },
       // {
       //   headerName: "aaGroup",
